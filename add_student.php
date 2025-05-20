@@ -49,7 +49,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 <a href="./students.php" class="btn btn-secondary mb-3">← Back to Students</a>
 
-<h2 class="mt-4 mb-4">Add a new student</h2>
+<h2 class="mt-4 mb-4">Student Form</h2>
 
 <?php if (!empty($error)): ?>
     <div class="alert alert-danger"> <?= htmlspecialchars($error) ?> </div>
