@@ -6,7 +6,6 @@ include 'utils/validate_student.php';
 $id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
 $name = $email = '';
 $course_id = null;
-$error = '';
 
 if ($id) {
     $stmt = $pdo->prepare("SELECT * FROM students WHERE id = ?");
@@ -50,6 +49,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 ?>
 
+<a href="./students.php" class="btn btn-secondary mb-3">← Back to Students</a>
+
+<h2 class="mt-4 mb-4">Student Form</h2>
+
 <?php if (!empty($errors)): ?>
     <div class="alert alert-danger">
         <ul class="mb-0">
@@ -58,14 +61,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <?php endforeach; ?>
         </ul>
     </div>
-<?php endif; ?>
-
-<a href="./students.php" class="btn btn-secondary mb-3">← Back to Students</a>
-
-<h2 class="mt-4 mb-4">Student Form</h2>
-
-<?php if (!empty($error)): ?>
-    <div class="alert alert-danger"> <?= htmlspecialchars($error) ?> </div>
 <?php endif; ?>
 
 <form method="post" class="mb-4">
