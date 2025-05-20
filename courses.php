@@ -19,6 +19,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt->execute([$course_name]);
     }
 }
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['edit_course_id'])) {
+    $edit_id = (int)$_POST['edit_course_id'];
+    $new_name = htmlspecialchars(trim($_POST['edit_course_name']));
+    
+    if (!empty($new_name)) {
+        $stmt = $pdo->prepare("UPDATE courses SET course_name = ? WHERE id = ?");
+        $stmt->execute([$new_name, $edit_id]);
+        header("Location: courses.php");
+        exit;
+    }
+}
+
 ?>
 
 <h2 class="mb-4">Courses List</h2>
@@ -47,7 +60,19 @@ try {
             <tr>
                 <td><?= htmlspecialchars($course['course_name']) ?></td>
                 <td>
-                    <button class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#confirmDeleteModal" data-course-id="<?= $course['id'] ?>">Delete</button>
+                    <button class="btn btn-primary btn-sm"
+                            data-bs-toggle="modal"
+                            data-bs-target="#editCourseModal"
+                            data-course-id="<?= $course['id'] ?>"
+                            data-course-name="<?= htmlspecialchars($course['course_name']) ?>">
+                        Edit
+                    </button>
+                    <button class="btn btn-danger btn-sm"
+                            data-bs-toggle="modal"
+                            data-bs-target="#confirmDeleteModal"
+                            data-course-id="<?= $course['id'] ?>">
+                        Delete
+                    </button>
                 </td>
             </tr>
             <?php endforeach; ?>
@@ -84,6 +109,29 @@ try {
   </div>
 </div>
 
+<div class="modal fade" id="editCourseModal" tabindex="-1" aria-labelledby="editCourseModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <form method="post" class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="editCourseModalLabel">Edit Course</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" name="edit_course_id" id="editCourseId">
+        <div class="mb-3">
+          <label for="editCourseName" class="form-label">Course Name</label>
+          <input type="text" name="edit_course_name" class="form-control" id="editCourseName" required>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="submit" class="btn btn-primary">Save</button>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+
 <script>
     const confirmDeleteModal = document.getElementById('confirmDeleteModal');
     confirmDeleteModal.addEventListener('show.bs.modal', function (event) {
@@ -91,6 +139,15 @@ try {
         const courseId = button.getAttribute('data-course-id');
         const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
         confirmDeleteBtn.href = `?delete=${courseId}`;
+    });
+
+    const editCourseModal = document.getElementById('editCourseModal');
+    editCourseModal.addEventListener('show.bs.modal', function (event) {
+        const button = event.relatedTarget;
+        const courseId = button.getAttribute('data-course-id');
+        const courseName = button.getAttribute('data-course-name');
+        document.getElementById('editCourseId').value = courseId;
+        document.getElementById('editCourseName').value = courseName;
     });
 </script>
 
