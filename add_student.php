@@ -1,4 +1,7 @@
-<?php include 'includes/header.php'; include 'db.php';
+<?php 
+include 'includes/header.php';
+include 'db.php';
+include 'utils/validate_student.php'; 
 
 $id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
 $name = $email = '';
@@ -17,35 +20,45 @@ if ($id) {
     }
 }
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $name = htmlspecialchars(trim($_POST['name']));
-    $email = filter_var(trim($_POST['email']), FILTER_SANITIZE_EMAIL);
-    $course_id = isset($_POST['course_id']) && $_POST['course_id'] !== ''
-        ? (int)$_POST['course_id']
-        : null;
 
-    try {
-        if ($id) {
-            $stmt = $pdo->prepare("UPDATE students SET name = ?, email = ?, course_id = ? WHERE id = ?");
-            $stmt->execute([$name, $email, $course_id, $id]);
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $name = trim($_POST['name']);
+    $email = trim($_POST['email']);
+    $course_id = isset($_POST['course_id']) && $_POST['course_id'] !== '' ? (int)$_POST['course_id'] : null;
+
+    $errors = validate_student_input($name, $email, $course_id);
+
+    if (empty($errors)) {
+        try {
+            if ($id) {
+                $stmt = $pdo->prepare("UPDATE students SET name = ?, email = ?, course_id = ? WHERE id = ?");
+                $stmt->execute([$name, $email, $course_id, $id]);
+            } else {
+                $stmt = $pdo->prepare("INSERT INTO students (name, email, course_id) VALUES (?, ?, ?)");
+                $stmt->execute([$name, $email, $course_id]);
+            }
             header("Location: students.php");
             exit;
-        } else {
-            $stmt = $pdo->prepare("INSERT INTO students (name, email, course_id) VALUES (?, ?, ?)");
-            $stmt->execute([$name, $email, $course_id]);
-            header("Location: students.php");
-            exit;
-        }
-    } catch (PDOException $e) {
-        // Code below refers to error for duplicate entries in the email field
-        if ($e->getCode() == 23000) {
-            $error = "A student with this email already exists.";
-        } else {
-            $error = "Failed to save the student: " . $e->getMessage();
+        } catch (PDOException $e) {
+            if ($e->getCode() == 23000) {
+                $errors[] = "A student with this email already exists.";
+            } else {
+                $errors[] = "Failed to save the student: " . $e->getMessage();
+            }
         }
     }
 }
 ?>
+
+<?php if (!empty($errors)): ?>
+    <div class="alert alert-danger">
+        <ul class="mb-0">
+            <?php foreach ($errors as $err): ?>
+                <li><?= htmlspecialchars($err) ?></li>
+            <?php endforeach; ?>
+        </ul>
+    </div>
+<?php endif; ?>
 
 <a href="./students.php" class="btn btn-secondary mb-3">← Back to Students</a>
 
