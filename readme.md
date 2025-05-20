@@ -19,6 +19,9 @@
 
 https://github.com/user-attachments/assets/1b75363e-c49a-4995-a6fd-68c25403aed3
 
+- Responsiveness Demo
+
+https://github.com/user-attachments/assets/358d219e-87ab-40fe-9f7b-44daabc7fc86
 
 - Enrollment Page
 <img width="400" alt="Screenshot 2025-05-20 at 22 16 20" src="https://github.com/user-attachments/assets/55af3612-3016-4db9-b95c-9995604f1638" />
