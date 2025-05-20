@@ -1,4 +1,6 @@
-<?php include 'db.php';
+<?php
+include 'db.php';
+
 if (isset($_GET['delete'])) {
     $id = (int)$_GET['delete'];
     $stmt = $pdo->prepare("DELETE FROM courses WHERE id = ?");
@@ -28,24 +30,41 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </div>
 </form>
 
-<table class="table table-bordered">
-    <thead>
-        <tr><th>Course Name</th><th>Actions</th></tr>
-    </thead>
-    <tbody>
-        <?php
-        $stmt = $pdo->query("SELECT * FROM courses ORDER BY course_name");
-        while ($course = $stmt->fetch()):
-        ?>
-        <tr>
-            <td><?= htmlspecialchars($course['course_name']) ?></td>
-            <td>
-                <button class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#confirmDeleteModal" data-course-id="<?= $course['id'] ?>">Delete</button>
-            </td>
-        </tr>
-        <?php endwhile; ?>
-    </tbody>
-</table>
+<div class="table-responsive mb-4">
+<?php
+try {
+    $stmt = $pdo->query("SELECT * FROM courses ORDER BY course_name");
+    if ($stmt) {
+        $courses = $stmt->fetchAll();
+        if ($courses && count($courses) > 0):
+?>
+    <table class="table table-bordered">
+        <thead>
+            <tr><th>Course Name</th><th>Actions</th></tr>
+        </thead>
+        <tbody>
+            <?php foreach ($courses as $course): ?>
+            <tr>
+                <td><?= htmlspecialchars($course['course_name']) ?></td>
+                <td>
+                    <button class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#confirmDeleteModal" data-course-id="<?= $course['id'] ?>">Delete</button>
+                </td>
+            </tr>
+            <?php endforeach; ?>
+        </tbody>
+    </table>
+<?php else: ?>
+    <i>No data to show...</i>
+<?php endif; ?>
+<?php
+    } else {
+        echo '<i>No data to show...</i>';
+    }
+} catch (PDOException $e) {
+    echo '<i>No data to show...</i>';
+}
+?>
+</div>
 
 <div class="modal fade" id="confirmDeleteModal" tabindex="-1" aria-labelledby="confirmDeleteModalLabel" aria-hidden="true">
   <div class="modal-dialog">
