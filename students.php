@@ -17,6 +17,17 @@ if (isset($_GET['delete'])) {
 <a href="add_student.php" class="btn btn-success mb-3">Add Student</a>
 
 <div class="table-responsive mb-4">
+    <?php
+    try {
+        $stmt = $pdo->query("SELECT students.id, name, email, course_name 
+                             FROM students
+                             LEFT JOIN courses ON students.course_id = courses.id
+                             ORDER BY course_name");
+
+        if ($stmt) {
+            $students = $stmt->fetchAll();
+            if ($students && count($students) > 0):
+    ?>
     <table class="table table-bordered">
         <thead>
             <tr>
@@ -24,14 +35,7 @@ if (isset($_GET['delete'])) {
             </tr>
         </thead>
         <tbody>
-            <?php
-            $stmt = $pdo->query("SELECT students.id, name, email, course_name 
-                                 FROM students
-                                 LEFT JOIN courses ON students.course_id = courses.id
-                                 ORDER BY course_name");
-
-            while ($row = $stmt->fetch()):
-            ?>
+            <?php foreach ($students as $row): ?>
             <tr>
                 <td><?= htmlspecialchars($row['name']) ?></td>
                 <td><?= htmlspecialchars($row['email']) ?></td>
@@ -41,9 +45,20 @@ if (isset($_GET['delete'])) {
                     <button class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#confirmDeleteModal" data-student-id="<?= $row['id'] ?>">Delete</button>
                 </td>
             </tr>
-            <?php endwhile; ?>
+            <?php endforeach; ?>
         </tbody>
     </table>
+    <?php else: ?>
+    <i>No data to show...</i>
+    <?php endif; ?>
+    <?php
+        } else {
+            echo '<i>No data to show...</i>';
+        }
+    } catch (PDOException $e) {
+        echo '<i>No data to show...</i>';
+    }
+    ?>
 </div>
 
 <div class="modal fade" id="confirmDeleteModal" tabindex="-1" aria-labelledby="confirmDeleteModalLabel" aria-hidden="true">
